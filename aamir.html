@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Inconvenient Truth">
+<meta name="theme-color" content="#0a0b0d">
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+<title>An Inconvenient Truth &mdash; Economic Lens</title>
+<style>
+:root {
+  --serif: Georgia,'Times New Roman',serif;
+  --mono: 'Courier New',Courier,monospace;
+  --black:#0a0b0d; --charcoal:#141618; --slate:#1e2124; --steel:#2c3136;
+  --mist:#8a9199; --fog:#c5ccd3; --white:#f0f2f4;
+  --glacier:#4a9ebe; --amber:#e8a020; --danger:#d94f3a; --acid:#7ec845;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:var(--black);color:var(--fog);font-family:var(--serif);overflow-x:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+img,canvas{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.5rem;padding-top:max(1rem,env(safe-area-inset-top));
+  padding-left:max(1.5rem,env(safe-area-inset-left));padding-right:max(1.5rem,env(safe-area-inset-right));
+  background:rgba(10,11,13,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-logo{font-family:var(--serif);font-size:.78rem;font-weight:700;letter-spacing:.2em;color:var(--amber);text-transform:uppercase}
+.nav-links{display:flex;gap:1.4rem;list-style:none}
+.nav-links a{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;color:var(--mist);text-decoration:none;text-transform:uppercase;padding:.5rem 0}
+.nav-links a:hover{color:var(--glacier)}
+.nav-ham{display:none;flex-direction:column;gap:5px;padding:10px;margin:-10px;background:none;border:none;min-width:44px;min-height:44px;align-items:center;justify-content:center}
+.nav-ham span{display:block;width:22px;height:2px;background:var(--fog);transition:all .3s;transform-origin:center}
+.nav-ham.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-ham.open span:nth-child(2){opacity:0}
+.nav-ham.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;inset:0;z-index:199;background:rgba(10,11,13,.98);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);flex-direction:column;
+  align-items:center;justify-content:center;gap:0;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-family:var(--mono);font-size:.9rem;letter-spacing:.2em;color:var(--fog);text-decoration:none;
+  text-transform:uppercase;padding:1rem 3rem;width:100%;text-align:center;min-height:56px;
+  display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.05)}
+.mobile-menu a:active{background:rgba(232,160,32,.12);color:var(--amber)}
+
+/* HERO */
+.hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:5rem 1.5rem 3.5rem;
+  padding-top:max(5rem,calc(env(safe-area-inset-top) + 4rem));
+  padding-bottom:max(3.5rem,env(safe-area-inset-bottom));
+  padding-left:max(1.5rem,env(safe-area-inset-left));
+  padding-right:max(1.5rem,env(safe-area-inset-right));
+  position:relative;overflow:hidden;
+  background:radial-gradient(ellipse at 30% 40%,#0d2233 0%,var(--black) 65%)}
+.hero-canvas{position:absolute;inset:0;opacity:.5;pointer-events:none}
+.hero-content{position:relative;z-index:2;max-width:680px}
+.hero-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.28em;color:var(--glacier);text-transform:uppercase;margin-bottom:1rem}
+.hero-title{font-family:var(--serif);font-size:clamp(2.6rem,10vw,6rem);font-weight:700;line-height:.97;color:var(--white);margin-bottom:1rem}
+.hero-title em{color:var(--amber);font-style:italic}
+.hero-sub{font-size:clamp(.88rem,3.2vw,1rem);color:var(--mist);line-height:1.75;max-width:480px;margin-bottom:1.8rem}
+.hero-counter{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;border:1px solid rgba(74,158,190,.3);padding:.85rem 1.1rem;background:rgba(74,158,190,.05)}
+.c-label{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;color:var(--mist);text-transform:uppercase}
+.c-val{font-family:var(--mono);font-size:1.25rem;font-weight:700;color:var(--danger)}
+.c-div{width:1px;height:34px;background:var(--steel)}
+
+/* SECTIONS */
+section{padding:4.5rem 1.5rem;border-top:1px solid rgba(255,255,255,.05)}
+@supports(padding:max(0px)){section{padding-left:max(1.5rem,env(safe-area-inset-left));padding-right:max(1.5rem,env(safe-area-inset-right))}}
+.badge{display:inline-block;font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;padding:.28rem .65rem;border:1px solid var(--amber);color:var(--amber);margin-bottom:.75rem}
+.s-title{font-family:var(--serif);font-size:clamp(1.8rem,5.5vw,2.8rem);font-weight:700;color:var(--white);line-height:1.1;margin-bottom:.75rem}
+.s-desc{font-size:clamp(.86rem,2.8vw,.98rem);color:var(--mist);line-height:1.8;max-width:520px;margin-bottom:2.2rem}
+.card{background:var(--charcoal);border:1px solid var(--steel);padding:clamp(1rem,3.5vw,2rem);margin-top:1.5rem}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.7rem;margin-bottom:1.4rem}
+.card-title{font-family:var(--serif);font-size:1.2rem;color:var(--white);font-weight:700}
+.tip{margin-top:1rem;font-size:.78rem;color:var(--mist);font-style:italic;line-height:1.6}
+
+/* SLIDERS — iPhone-optimised touch targets */
+.sl-wrap{margin-bottom:1.3rem}
+.sl-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;color:var(--mist);margin-bottom:.5rem}
+.sl-val{color:var(--glacier);font-weight:700}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;outline:none;touch-action:manipulation;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:linear-gradient(to right,var(--glacier) var(--pct,50%),var(--steel) var(--pct,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:var(--glacier);border:3px solid var(--black);box-shadow:0 0 0 2px rgba(74,158,190,.3);margin-top:-12px;cursor:pointer}
+input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:var(--steel)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--glacier);border:3px solid var(--black)}
+
+/* NUMBERS */
+.bignum{font-family:var(--serif);font-size:clamp(1.5rem,5.5vw,2.5rem);font-weight:700;line-height:1}
+.gc{color:var(--acid)}.rc{color:var(--danger)}.ac{color:var(--amber)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
+.ext-box{background:var(--slate);padding:1.1rem;border:1px solid var(--steel)}
+.ext-box h4{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);margin-bottom:.7rem}
+.pol-box{background:var(--slate);padding:1.1rem}
+.pol-label{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.6rem}
+.pol-num{font-family:var(--serif);font-size:1.7rem;font-weight:700;line-height:1;margin-bottom:.2rem}
+.pol-sub{font-family:var(--mono);font-size:.56rem;color:var(--mist);margin-bottom:.4rem}
+.smoke-viz{display:flex;gap:4px;flex-wrap:wrap;margin-top:.7rem}
+.smoke-dot{width:9px;height:9px;border-radius:50%;background:var(--danger);opacity:.7}
+.commons-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start}
+.lake-viz{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:.8rem 0}
+.fish-cell{aspect-ratio:1;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:.5rem;transition:background .4s}
+.fish-alive{background:rgba(74,158,190,.15)}.fish-dead{background:rgba(217,79,58,.1)}
+.stock-box{background:var(--slate);padding:.9rem;border:1px solid var(--steel);margin-top:.8rem}
+.stock-lbl{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);margin-bottom:.35rem}
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1rem}
+.d-card{background:var(--slate);padding:1rem;border:1px solid var(--steel);text-align:center}
+.d-lbl{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;color:var(--mist);margin-bottom:.35rem;text-transform:uppercase}
+.d-val{font-family:var(--serif);font-size:1.6rem;font-weight:700}
+.info-box{margin-top:1rem;padding:.9rem;background:rgba(74,158,190,.06);border-left:2px solid var(--glacier);font-size:.78rem;color:var(--fog);line-height:1.65}
+.gdp-bars{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;margin-top:1rem}
+.gdp-col h4{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);margin-bottom:.7rem}
+.gb-item{margin-bottom:.6rem}
+.gb-name{font-family:var(--mono);font-size:.58rem;color:var(--fog);margin-bottom:.22rem}
+.gb-track{height:14px;background:var(--steel);border-radius:1px;overflow:hidden}
+.gb-fill{height:100%;transition:width 1s ease}
+.bar-chart{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem}
+.bar-row{display:flex;align-items:center;gap:.7rem}
+.bar-lbl{font-family:var(--mono);font-size:.58rem;color:var(--mist);width:68px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:24px;background:var(--steel);border-radius:1px;overflow:hidden}
+.bar-fill{height:100%;transition:width .8s ease;display:flex;align-items:center;padding-left:.45rem;font-family:var(--mono);font-size:.56rem;color:#0a0b0d;font-weight:700;min-width:50px}
+.cost-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-top:1.3rem}
+.cc{text-align:center;padding:.8rem .5rem;border:1px solid}
+.cc-lbl{font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.25rem}
+.cc-num{font-family:var(--serif);font-size:1.35rem;font-weight:700}
+.cc-sub{font-family:var(--mono);font-size:.5rem;color:var(--mist);margin-top:.15rem}
+
+/* FOOTER */
+footer{background:var(--charcoal);border-top:1px solid var(--steel);padding:2.5rem 1.5rem;
+  padding-bottom:max(2.5rem,env(safe-area-inset-bottom));text-align:center}
+footer .q{font-family:var(--serif);font-size:1.15rem;color:var(--fog);font-style:italic;margin-bottom:.7rem;line-height:1.5}
+footer .cr{font-family:var(--mono);font-size:.58rem;color:var(--mist);letter-spacing:.08em;line-height:1.9}
+
+/* FADE IN */
+.fade-in{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* GAME */
+#game{border-top:2px solid var(--amber)}
+.setup-panel{background:var(--charcoal);border:1px solid var(--steel);padding:1.4rem;margin-bottom:1.4rem}
+.p-btns{display:flex;gap:.7rem;margin-top:.7rem;flex-wrap:wrap}
+.p-btn{flex:1;min-width:90px;background:var(--slate);border:1px solid var(--steel);padding:.85rem .7rem;color:var(--fog);font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;text-align:center;min-height:52px;touch-action:manipulation;transition:all .2s;line-height:1.4}
+.p-btn.active,.p-btn:active{border-color:var(--amber);color:var(--amber);background:rgba(232,160,32,.08)}
+.confirm-btn{display:block;width:100%;margin-top:1rem;background:var(--amber);color:#0a0b0d;font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;padding:.95rem 1.5rem;border:none;min-height:52px;touch-action:manipulation;font-weight:700;transition:opacity .2s,transform .1s}
+.confirm-btn:disabled{opacity:.3;cursor:not-allowed}
+.confirm-btn:not(:disabled):active{transform:scale(.98);opacity:.9}
+.prog-track{display:flex;gap:.5rem;align-items:center;margin-bottom:1.6rem}
+.prog-step{flex:1;height:4px;background:var(--steel);transition:background .5s;border-radius:2px}
+.prog-step.done{background:var(--acid)}.prog-step.current{background:var(--amber)}
+.prog-lbl{font-family:var(--mono);font-size:.56rem;color:var(--mist);white-space:nowrap}
+.scoreboard{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-bottom:1.6rem}
+.score-tile{background:var(--slate);border:1px solid var(--steel);padding:.75rem .45rem;text-align:center;position:relative;overflow:hidden}
+.score-tile::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--tc,var(--glacier))}
+.st-lbl{font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);margin-bottom:.25rem}
+.st-val{font-family:var(--serif);font-size:1.7rem;font-weight:700;line-height:1;transition:color .4s}
+.st-bar{height:3px;background:var(--steel);margin-top:.45rem}
+.st-bfill{height:100%;transition:width .6s ease}
+.st-delta{font-family:var(--mono);font-size:.58rem;margin-top:.22rem;min-height:.85rem}
+.rnd-head{display:flex;align-items:center;flex-wrap:wrap;gap:.7rem;margin-bottom:1.3rem;padding-bottom:.9rem;border-bottom:1px solid var(--steel)}
+.rnd-badge{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;padding:.35rem .8rem;background:var(--amber);color:#0a0b0d;font-weight:700}
+.rnd-desc{font-size:.8rem;color:var(--mist);font-style:italic}
+.game-phase{background:var(--charcoal);border:1px solid var(--steel);padding:1.1rem;margin-bottom:1.1rem;display:none}
+.game-phase.active{display:block}
+.phase-title{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--glacier);margin-bottom:.9rem}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.choice-btn{background:var(--slate);border:2px solid var(--steel);padding:.95rem .85rem;text-align:left;color:var(--fog);font-family:var(--serif);-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;min-height:52px;transition:border-color .15s,background .15s;cursor:pointer}
+.choice-btn:active{border-color:var(--amber);background:rgba(232,160,32,.1)}
+.choice-btn.selected{border-color:var(--amber);background:rgba(232,160,32,.09)}
+.cb-icon{font-size:1.25rem;margin-bottom:.28rem}
+.cb-name{font-family:var(--serif);font-size:.92rem;color:var(--white);margin-bottom:.28rem;font-weight:700}
+.cb-desc{font-size:.7rem;color:var(--mist);margin-bottom:.45rem;line-height:1.4}
+.cb-fx{display:flex;flex-wrap:wrap;gap:.22rem}
+.fx{font-family:var(--mono);font-size:.5rem;padding:.1rem .32rem;border-radius:2px}
+.fx-p{background:rgba(126,200,69,.12);color:var(--acid);border:1px solid rgba(126,200,69,.28)}
+.fx-n{background:rgba(217,79,58,.12);color:var(--danger);border:1px solid rgba(217,79,58,.28)}
+.log-panel{background:var(--slate);border:1px solid var(--steel);padding:.8rem;max-height:150px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:1.1rem}
+.log-entry{font-family:var(--mono);font-size:.58rem;color:var(--mist);padding:.22rem 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.55}
+.log-entry .lh{color:var(--glacier)}.log-entry.bad .lh{color:var(--danger)}.log-entry.good .lh{color:var(--acid)}
+.ev-panel{border:1px solid var(--steel);padding:1.1rem;background:var(--slate);margin-bottom:1.1rem}
+.ev-icon{font-size:2rem;margin-bottom:.35rem}
+.ev-name{font-family:var(--serif);font-size:1.35rem;color:var(--white);margin-bottom:.35rem;font-weight:700}
+.ev-sub{font-size:.78rem;color:var(--mist);margin-bottom:.7rem;line-height:1.5}
+.final-result{text-align:center;padding:2.2rem 1.3rem;border:2px solid var(--rc,var(--glacier));background:rgba(0,0,0,.4);display:none}
+.final-result.show{display:block}
+.fi{font-size:3rem;margin-bottom:.7rem}
+.ft{font-family:var(--serif);font-size:clamp(1.5rem,5.5vw,2rem);margin-bottom:.7rem;font-weight:700}
+.fd{font-size:.88rem;color:var(--mist);line-height:1.8;max-width:440px;margin:0 auto 1.2rem}
+.fm{font-family:var(--mono);font-size:.6rem;color:rgba(138,145,153,.65);margin-bottom:1.3rem;font-style:italic;line-height:1.6}
+
+/* RESPONSIVE */
+@media(min-width:769px){nav{padding:1.1rem 3rem}section{padding:5.5rem 3rem}.card{padding:2rem}.nav-ham{display:none!important}}
+@media(max-width:768px){.nav-links{display:none}.nav-ham{display:flex}.hero{padding-top:max(4.5rem,calc(env(safe-area-inset-top) + 3.5rem))}.g2,.commons-grid,.gdp-bars{grid-template-columns:1fr}.c-div{display:none}}
+@media(max-width:480px){.scoreboard{grid-template-columns:repeat(2,1fr)}.choice-grid{grid-template-columns:1fr}.p-btns{flex-direction:column}.rnd-head{flex-direction:column;align-items:flex-start;gap:.35rem}.dg{grid-template-columns:1fr}.cost-cards{grid-template-columns:1fr;gap:.5rem}.g3{grid-template-columns:1fr}}
+@media(max-width:370px){.st-val{font-size:1.35rem}.st-lbl{font-size:.45rem}.scoreboard{gap:.4rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">An Inconvenient Truth</div>
+  <ul class="nav-links">
+    <li><a href="#externalities">Externalities</a></li>
+    <li><a href="#commons">Commons</a></li>
+    <li><a href="#discount">Discount</a></li>
+    <li><a href="#gdp">Green GDP</a></li>
+    <li><a href="#cost">Costs</a></li>
+    <li><a href="#game" style="color:var(--amber)">&#9654; Play</a></li>
+  </ul>
+  <button class="nav-ham" id="ham" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mm">
+  <a href="#externalities" onclick="cm()">Externalities</a>
+  <a href="#commons" onclick="cm()">Commons</a>
+  <a href="#discount" onclick="cm()">Discount Rate</a>
+  <a href="#gdp" onclick="cm()">Green GDP</a>
+  <a href="#cost" onclick="cm()">Cost of Inaction</a>
+  <a href="#game" onclick="cm()" style="color:var(--amber)">&#9654; Run Country</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas class="hero-canvas" id="hc"></canvas>
+  <div class="hero-content">
+    <p class="hero-label">Economic Lens &mdash; A Documentary Study</p>
+    <h1 class="hero-title">An<br><em>Inconvenient</em><br>Truth</h1>
+    <p class="hero-sub">Al Gore&#8217;s 2006 documentary warned us. Economists have since put numbers on the silence. Explore the market failures, policy tools, and hidden costs that climate change forces us to confront.</p>
+    <div class="hero-counter">
+      <div><div class="c-label">Est. Climate Cost / Second</div><div class="c-val" id="heroCost">$0</div></div>
+      <div class="c-div"></div>
+      <div><div class="c-label">CO&#8322; ppm (2024)</div><div class="c-val" style="color:var(--amber)">422.8</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXTERNALITIES -->
+<section id="externalities" style="background:var(--charcoal)">
+  <div class="fade-in">
+    <div class="badge">Concept 01 &mdash; Negative Externalities</div>
+    <h2 class="s-title">The Hidden Bill<br>Society Pays</h2>
+    <p class="s-desc">When a factory burns fossil fuels, its profit ignores the pollution costs borne by everyone else. This gap between private cost and social cost is a market failure at the heart of climate change.</p>
+  </div>
+  <div class="card fade-in">
+    <div class="card-head"><div class="card-title">Externality Simulator</div><span class="badge" style="margin:0">Drag slider</span></div>
+    <div class="sl-wrap">
+      <div class="sl-label"><span>Factory Production Level</span><span class="sl-val" id="prodVal">50%</span></div>
+      <input type="range" min="0" max="100" value="50" id="prodSlider">
+    </div>
+    <div class="g2">
+      <div class="ext-box"><h4>Company Private Profit</h4><div class="bignum gc" id="profit">$500M</div><p style="font-size:.7rem;color:var(--mist);margin-top:.4rem">Revenue captured by shareholders</p></div>
+      <div class="ext-box"><h4>External Social Cost</h4><div class="bignum rc" id="extCost">$875M</div><p style="font-size:.7rem;color:var(--mist);margin-top:.4rem">Health, ecosystem &amp; climate damage</p></div>
+      <div class="ext-box" style="grid-column:1/-1;border-color:rgba(232,160,32,.35)"><h4>Market Gap (Externality)</h4><div class="bignum ac" id="gap">$375M</div><p style="font-size:.7rem;color:var(--mist);margin-top:.4rem">The amount the market under-prices pollution &mdash; the core of climate economics</p><div class="smoke-viz" id="sViz"></div></div>
+    </div>
+    <p class="tip">&#128161; <strong style="color:var(--fog)">Pigouvian Tax Fix:</strong> A carbon tax equal to the external cost forces the company to internalize what was previously a free externality.</p>
+  </div>
+</section>
+
+<!-- CARBON POLICY -->
+<section id="carbon-policy">
+  <div class="fade-in">
+    <div class="badge">Concept 02 &mdash; Carbon Tax vs. Cap-and-Trade</div>
+    <h2 class="s-title">Pricing<br>the Atmosphere</h2>
+    <p class="s-desc">Two market-based tools compete to correct the externality. A carbon tax sets the price; the market sets quantity. Cap-and-trade sets the quantity; the market sets the price.</p>
+  </div>
+  <div class="card fade-in">
+    <div class="card-head"><div class="card-title">Policy Comparison Tool</div></div>
+    <div class="sl-wrap">
+      <div class="sl-label"><span>Carbon Price ($/tonne CO&#8322;)</span><span class="sl-val" id="cpVal">$50</span></div>
+      <input type="range" min="0" max="200" value="50" id="cpSlider">
+    </div>
+    <div class="g2">
+      <div class="pol-box" style="border:1px solid rgba(74,158,190,.35)">
+        <div class="pol-label" style="color:var(--glacier)">Carbon Tax</div>
+        <div class="pol-sub">Emissions Reduced</div><div class="pol-num gc" id="taxEm">25%</div>
+        <div class="pol-sub" style="margin-top:.7rem">Revenue for Govt</div><div class="pol-num" style="color:var(--glacier)" id="taxRev">$250B</div>
+        <p style="font-size:.65rem;color:var(--mist);margin-top:.5rem">Certainty on price. Outcome uncertain.</p>
+      </div>
+      <div class="pol-box" style="border:1px solid rgba(232,160,32,.35)">
+        <div class="pol-label" style="color:var(--amber)">Cap-and-Trade</div>
+        <div class="pol-sub">Emissions Cap</div><div class="pol-num gc" id="capEm">30%</div>
+        <div class="pol-sub" style="margin-top:.7rem">Permit Market Price</div><div class="pol-num ac" id="capPr">$58</div>
+        <p style="font-size:.65rem;color:var(--mist);margin-top:.5rem">Certainty on quantity. Price fluctuates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMONS -->
+<section id="commons" style="background:var(--charcoal)">
+  <div class="fade-in">
+    <div class="badge">Concept 03 &mdash; Tragedy of the Commons</div>
+    <h2 class="s-title">The Shared Lake<br>Nobody Owns</h2>
+    <p class="s-desc">Gareth Hardin&#8217;s 1968 theory: when a resource is shared, individuals acting in self-interest deplete it for everyone. The atmosphere is the ultimate global commons.</p>
+  </div>
+  <div class="card fade-in">
+    <div class="card-head"><div class="card-title">Fishing Lake Simulation</div></div>
+    <div class="commons-grid">
+      <div>
+        <div class="sl-wrap"><div class="sl-label"><span>Players in the Lake</span><span class="sl-val" id="playersVal">5</span></div><input type="range" min="1" max="20" value="5" id="plSlider"></div>
+        <div class="sl-wrap"><div class="sl-label"><span>Fish Per Player / Year</span><span class="sl-val" id="fishVal">8</span></div><input type="range" min="1" max="20" value="8" id="fiSlider"></div>
+        <div class="stock-box"><div class="stock-lbl">Stock Status</div><div class="bignum" id="stockSt" style="font-size:1.35rem;color:var(--acid)">Sustainable</div><div style="font-family:var(--mono);font-size:.62rem;color:var(--mist);margin-top:.28rem">Harvest: <span id="totHarvest" style="color:var(--fog)">40</span>/yr &nbsp;|&nbsp; Capacity: <span style="color:var(--glacier)">100</span>/yr</div></div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:.6rem">Lake Fish Stock</div>
+        <div class="lake-viz" id="lakeGrid"></div>
+      </div>
+    </div>
+    <p class="tip">&#128161; <strong style="color:var(--fog)">Solution:</strong> Property rights, international agreements, or regulation can prevent collapse &mdash; analogous to the Paris Agreement&#8217;s role in managing atmospheric commons.</p>
+  </div>
+</section>
+
+<!-- DISCOUNT RATE -->
+<section id="discount">
+  <div class="fade-in">
+    <div class="badge">Concept 04 &mdash; Discount Rate &amp; Intergenerational Equity</div>
+    <h2 class="s-title">How Much Is<br>Tomorrow Worth?</h2>
+    <p class="s-desc">The discount rate determines how we value future costs vs. present costs. A high rate says future generations matter little; a low rate demands action now.</p>
+  </div>
+  <div class="card fade-in">
+    <div class="card-head"><div class="card-title">Intergenerational Value Calculator</div></div>
+    <div class="sl-wrap"><div class="sl-label"><span>Annual Discount Rate</span><span class="sl-val" id="drVal">3%</span></div><input type="range" min="0" max="10" value="3" step="0.5" id="drSlider"></div>
+    <p style="font-size:.8rem;color:var(--mist);margin-bottom:1rem">&#8220;$1 trillion in climate damages in 2100&#8221; &mdash; how much is it worth to us <em>today</em>?</p>
+    <div class="dg">
+      <div class="d-card"><div class="d-lbl">Today (2025)</div><div class="d-val" style="color:var(--white)">$1T</div><div style="font-family:var(--mono);font-size:.52rem;color:var(--mist);margin-top:.25rem">Face value</div></div>
+      <div class="d-card"><div class="d-lbl">In 2050 (25 yrs)</div><div class="d-val ac" id="val50">$477B</div><div style="font-family:var(--mono);font-size:.52rem;color:var(--mist);margin-top:.25rem">Present value</div></div>
+      <div class="d-card"><div class="d-lbl">In 2100 (75 yrs)</div><div class="d-val rc" id="val100">$103B</div><div style="font-family:var(--mono);font-size:.52rem;color:var(--mist);margin-top:.25rem">Present value</div></div>
+    </div>
+    <div class="info-box"><strong>Stern Review (2006):</strong> Used a near-zero discount rate (1.4%), concluding climate action costs ~1% of GDP now vs. 5&ndash;20% in damages if ignored. Critics argued it overweighted the future. This debate shapes all climate policy.</div>
+  </div>
+</section>
+
+<!-- GREEN GDP -->
+<section id="gdp" style="background:var(--charcoal)">
+  <div class="fade-in">
+    <div class="badge">Concept 05 &mdash; Natural Capital &amp; Green GDP</div>
+    <h2 class="s-title">Growth That<br>Costs the Earth</h2>
+    <p class="s-desc">Traditional GDP counts drilling oil as growth, ignoring the depleted resource. Green GDP subtracts environmental degradation to reveal true wealth creation.</p>
+  </div>
+  <div class="card fade-in">
+    <div class="card-head"><div class="card-title">GDP vs Green GDP Comparison</div></div>
+    <div class="gdp-bars">
+      <div class="gdp-col"><h4>Standard GDP Growth (%)</h4>
+        <div class="gb-item"><div class="gb-name">USA</div><div class="gb-track"><div class="gb-fill" style="width:72%;background:var(--glacier)"></div></div></div>
+        <div class="gb-item"><div class="gb-name">China</div><div class="gb-track"><div class="gb-fill" style="width:90%;background:var(--glacier)"></div></div></div>
+        <div class="gb-item"><div class="gb-name">India</div><div class="gb-track"><div class="gb-fill" style="width:82%;background:var(--glacier)"></div></div></div>
+        <div class="gb-item"><div class="gb-name">Germany</div><div class="gb-track"><div class="gb-fill" style="width:60%;background:var(--glacier)"></div></div></div>
+      </div>
+      <div class="gdp-col"><h4>Green GDP (env. adjusted)</h4>
+        <div class="gb-item"><div class="gb-name">USA</div><div class="gb-track"><div class="gb-fill" style="width:58%;background:var(--acid)"></div></div></div>
+        <div class="gb-item"><div class="gb-name">China</div><div class="gb-track"><div class="gb-fill" style="width:53%;background:var(--amber)"></div></div></div>
+        <div class="gb-item"><div class="gb-name">India</div><div class="gb-track"><div class="gb-fill" style="width:60%;background:var(--acid)"></div></div></div>
+        <div class="gb-item"><div class="gb-name">Germany</div><div class="gb-track"><div class="gb-fill" style="width:55%;background:var(--acid)"></div></div></div>
+      </div>
+    </div>
+    <p class="tip">China&#8217;s gap is largest &mdash; fast GDP growth comes with heavy environmental depletion costs not counted in official figures.</p>
+  </div>
+</section>
+
+<!-- COST OF INACTION -->
+<section id="cost">
+  <div class="fade-in">
+    <div class="badge">Concept 06 &mdash; Cost-Benefit Analysis</div>
+    <h2 class="s-title">The Price of<br>Doing Nothing</h2>
+    <p class="s-desc">The Stern Review&#8217;s central finding: spending 1% of GDP now on mitigation avoids 5&ndash;20% of GDP in future climate damages. The math favors action.</p>
+  </div>
+  <div class="card fade-in">
+    <div class="card-head"><div class="card-title">Scenario Cost Projector</div></div>
+    <div class="sl-wrap"><div class="sl-label"><span>Year Horizon</span><span class="sl-val" id="yrVal">2060</span></div><input type="range" min="2025" max="2100" value="2060" step="5" id="yrSlider"></div>
+    <div class="bar-chart">
+      <div class="bar-row"><div class="bar-lbl">Act Now</div><div class="bar-track"><div class="bar-fill" id="actBar" style="width:15%;background:var(--acid)">1% GDP</div></div></div>
+      <div class="bar-row"><div class="bar-lbl">Delay 10yr</div><div class="bar-track"><div class="bar-fill" id="delayBar" style="width:35%;background:var(--amber)">3.5% GDP</div></div></div>
+      <div class="bar-row"><div class="bar-lbl">No Action</div><div class="bar-track"><div class="bar-fill" id="noneBar" style="width:60%;background:var(--danger)">12% GDP</div></div></div>
+    </div>
+    <div class="cost-cards">
+      <div class="cc" style="border-color:rgba(126,200,69,.35);background:rgba(126,200,69,.07)"><div class="cc-lbl" style="color:var(--acid)">Act Now</div><div class="cc-num" id="actCost" style="color:var(--acid)">$1T</div><div class="cc-sub">mitigation cost</div></div>
+      <div class="cc" style="border-color:rgba(232,160,32,.35);background:rgba(232,160,32,.07)"><div class="cc-lbl" style="color:var(--amber)">Delay</div><div class="cc-num" id="delCost" style="color:var(--amber)">$3.5T</div><div class="cc-sub">adaptation cost</div></div>
+      <div class="cc" style="border-color:rgba(217,79,58,.35);background:rgba(217,79,58,.07)"><div class="cc-lbl" style="color:var(--danger)">Inaction</div><div class="cc-num" id="noneCost" style="color:var(--danger)">$12T</div><div class="cc-sub">damage cost</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GAME -->
+<section id="game">
+  <div class="fade-in">
+    <div class="badge">Concept 07 &mdash; Policy Simulation Game</div>
+    <h2 class="s-title">Run Your Country<br>for 30 Years</h2>
+    <p class="s-desc">You govern a nation through 3 decades of decisions. Balance economic growth, climate risk, citizen welfare, and inequality &mdash; just as real governments must. Every choice has consequences.</p>
+  </div>
+
+  <div class="setup-panel fade-in" id="setupPanel">
+    <div class="phase-title">Step 1 &mdash; Choose Number of Players</div>
+    <p style="font-size:.8rem;color:var(--mist);margin-bottom:.7rem">Roles divide among players. One player controls everything.</p>
+    <div class="p-btns">
+      <div class="p-btn active" onclick="selP(1,this)">&#128100; 1 Player<br><span style="font-size:.56rem;color:var(--mist)">Control everything</span></div>
+      <div class="p-btn" onclick="selP(2,this)">&#128101; 2 Players<br><span style="font-size:.56rem;color:var(--mist)">Gov + Co/Citizens</span></div>
+      <div class="p-btn" onclick="selP(3,this)">&#128101;&#128100; 3 Players<br><span style="font-size:.56rem;color:var(--mist)">Gov, Co, Citizens</span></div>
+    </div>
+    <button class="confirm-btn" onclick="startGame()">&#9654; Start Simulation</button>
+  </div>
+
+  <div id="gameBoard" style="display:none">
+    <div class="prog-track">
+      <span class="prog-lbl">Round 1</span>
+      <div class="prog-step" id="p1"></div><div class="prog-step" id="p2"></div><div class="prog-step" id="p3"></div>
+      <span class="prog-lbl">Round 3</span>
+    </div>
+    <div class="scoreboard">
+      <div class="score-tile" style="--tc:var(--glacier)"><div class="st-lbl">GDP</div><div class="st-val" id="sGDP" style="color:var(--glacier)">50</div><div class="st-bar"><div class="st-bfill" id="bGDP" style="width:50%;background:var(--glacier)"></div></div><div class="st-delta" id="dGDP"></div></div>
+      <div class="score-tile" style="--tc:var(--danger)"><div class="st-lbl">Clim.Risk</div><div class="st-val" id="sCR" style="color:var(--danger)">30</div><div class="st-bar"><div class="st-bfill" id="bCR" style="width:30%;background:var(--danger)"></div></div><div class="st-delta" id="dCR"></div></div>
+      <div class="score-tile" style="--tc:var(--acid)"><div class="st-lbl">Welfare</div><div class="st-val" id="sWF" style="color:var(--acid)">50</div><div class="st-bar"><div class="st-bfill" id="bWF" style="width:50%;background:var(--acid)"></div></div><div class="st-delta" id="dWF"></div></div>
+      <div class="score-tile" style="--tc:var(--amber)"><div class="st-lbl">Inequal.</div><div class="st-val" id="sIQ" style="color:var(--amber)">30</div><div class="st-bar"><div class="st-bfill" id="bIQ" style="width:30%;background:var(--amber)"></div></div><div class="st-delta" id="dIQ"></div></div>
+    </div>
+    <div class="rnd-head"><div class="rnd-badge" id="rndBadge">Round 1 / 3</div><div class="rnd-desc" id="rndDesc">Short-Term Comfort &mdash; growth looks easy, pollution feels harmless</div></div>
+    <div class="log-panel" id="gameLog"><div class="log-entry">&#9658; Simulation started. <span class="lh">Year 1 of 30.</span> Make your first decisions.</div></div>
+
+    <!-- GOV PHASE -->
+    <div class="game-phase active" id="phGov">
+      <div class="phase-title" id="govTitle">&#127963; Government &mdash; Choose a Policy</div>
+      <div class="choice-grid">
+        <div class="choice-btn" onclick="selC('gov','green',this)"><div class="cb-icon">&#127823;</div><div class="cb-name">Green Investment</div><div class="cb-desc">Build solar, wind, clean transport</div><div class="cb-fx"><span class="fx fx-p">GDP+4</span><span class="fx fx-p">Clim-6</span><span class="fx fx-p">Wel+5</span><span class="fx fx-p">Ineq-2</span></div></div>
+        <div class="choice-btn" onclick="selC('gov','fossil',this)"><div class="cb-icon">&#128293;</div><div class="cb-name">Fossil Fuel Growth</div><div class="cb-desc">Expand coal, oil, factories</div><div class="cb-fx"><span class="fx fx-p">GDP+8</span><span class="fx fx-n">Clim+10</span><span class="fx fx-n">Wel-3</span><span class="fx fx-n">Ineq+4</span></div></div>
+        <div class="choice-btn" onclick="selC('gov','tax',this)"><div class="cb-icon">&#128210;</div><div class="cb-name">Carbon Tax</div><div class="cb-desc">Tax pollution, slow dirty industry</div><div class="cb-fx"><span class="fx fx-n">GDP-3</span><span class="fx fx-p">Clim-8</span><span class="fx fx-p">Wel+4</span><span class="fx fx-p">Ineq-2</span></div></div>
+        <div class="choice-btn" onclick="selC('gov','delay',this)"><div class="cb-icon">&#8987;</div><div class="cb-name">Policy Delay</div><div class="cb-desc">No major changes, status quo</div><div class="cb-fx"><span class="fx fx-p">GDP+5</span><span class="fx fx-n">Clim+7</span><span class="fx fx-n">Ineq+2</span></div></div>
+      </div>
+      <button class="confirm-btn" id="govBtn" disabled onclick="confPhase('gov')">Confirm Policy &#8594;</button>
+    </div>
+
+    <!-- COMPANY PHASE -->
+    <div class="game-phase" id="phComp">
+      <div class="phase-title" id="compTitle">&#127981; Companies &mdash; Choose a Strategy</div>
+      <div class="choice-grid">
+        <div class="choice-btn" onclick="selC('comp','output',this)"><div class="cb-icon">&#127981;</div><div class="cb-name">Maximize Output</div><div class="cb-desc">Produce as much as possible</div><div class="cb-fx"><span class="fx fx-p">GDP+9</span><span class="fx fx-n">Clim+8</span><span class="fx fx-n">Ineq+4</span></div></div>
+        <div class="choice-btn" onclick="selC('comp','auto',this)"><div class="cb-icon">&#129302;</div><div class="cb-name">Automation</div><div class="cb-desc">Machines replace workers</div><div class="cb-fx"><span class="fx fx-p">GDP+5</span><span class="fx fx-n">Clim+4</span><span class="fx fx-n">Ineq+5</span></div></div>
+        <div class="choice-btn" onclick="selC('comp','gi',this)"><div class="cb-icon">&#127807;</div><div class="cb-name">Green Innovation</div><div class="cb-desc">Invest in cleaner technology</div><div class="cb-fx"><span class="fx fx-p">GDP+4</span><span class="fx fx-p">Clim-5</span><span class="fx fx-p">Ineq-1</span></div></div>
+        <div class="choice-btn" onclick="selC('comp','off',this)"><div class="cb-icon">&#127758;</div><div class="cb-name">Shift Abroad</div><div class="cb-desc">Move factories overseas</div><div class="cb-fx"><span class="fx fx-n">GDP-3</span><span class="fx fx-p">Clim-2</span><span class="fx fx-n">Ineq+3</span></div></div>
+      </div>
+      <button class="confirm-btn" id="compBtn" disabled onclick="confPhase('comp')">Confirm Strategy &#8594;</button>
+    </div>
+
+    <!-- CITIZEN PHASE -->
+    <div class="game-phase" id="phCit">
+      <div class="phase-title" id="citTitle">&#129730; Citizens &mdash; Choose a Behavior</div>
+      <div class="choice-grid">
+        <div class="choice-btn" onclick="selC('cit','consume',this)"><div class="cb-icon">&#128717;</div><div class="cb-name">Over-Consumption</div><div class="cb-desc">Buy more, waste more</div><div class="cb-fx"><span class="fx fx-p">GDP+6</span><span class="fx fx-n">Clim+7</span><span class="fx fx-n">Wel-2</span></div></div>
+        <div class="choice-btn" onclick="selC('cit','sq',this)"><div class="cb-icon">&#9878;</div><div class="cb-name">Status Quo</div><div class="cb-desc">Normal lifestyle, no change</div><div class="cb-fx"><span class="fx fx-p">GDP+3</span><span class="fx fx-n">Clim+3</span></div></div>
+        <div class="choice-btn" onclick="selC('cit','green',this)"><div class="cb-icon">&#127807;</div><div class="cb-name">Green Living</div><div class="cb-desc">Save energy, recycle, reduce waste</div><div class="cb-fx"><span class="fx fx-n">GDP-2</span><span class="fx fx-p">Clim-6</span><span class="fx fx-p">Wel+6</span></div></div>
+        <div class="choice-btn" onclick="selC('cit','protest',this)"><div class="cb-icon">&#9994;</div><div class="cb-name">Protest</div><div class="cb-desc">Demand better policies</div><div class="cb-fx"><span class="fx fx-n">GDP-2</span><span class="fx fx-p">Clim-3</span><span class="fx fx-p">Wel+3</span></div></div>
+      </div>
+      <button class="confirm-btn" id="citBtn" disabled onclick="confPhase('cit')">Confirm Behavior &#8594;</button>
+    </div>
+
+    <!-- EVENT -->
+    <div class="game-phase" id="phEv">
+      <div class="phase-title">&#9889; Climate Event This Decade</div>
+      <div class="ev-panel" id="evDisplay"></div>
+      <button class="confirm-btn" onclick="nextRound()">Next Decade &#8594;</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="final-result" id="finalRes">
+      <div class="fi" id="fIcon">&#127758;</div>
+      <div class="ft" id="fTitle">Result</div>
+      <div class="fd" id="fDesc"></div>
+      <div class="fm" id="fMsg"></div>
+      <button class="confirm-btn" onclick="resetGame()">&#8635; Play Again</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="q">&#8220;Our time to act is now.&#8221;</p>
+  <p class="cr">An Inconvenient Truth &mdash; Al Gore, 2006 &nbsp;|&nbsp; Economic Simulations for Educational Use<br>Based on Stern Review, Pigou (1920), Hardin (1968), and IPCC AR6 data</p>
+</footer>
+
+<script>
+// HERO CANVAS
+(function(){
+  var c=document.getElementById('hc'); if(!c)return;
+  var x=c.getContext('2d'),W,H,pts=[];
+  function rsz(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight}
+  rsz(); window.addEventListener('resize',function(){rsz();init()});
+  function init(){pts=[];for(var i=0;i<90;i++)pts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.3,vx:(Math.random()-.5)*.22,vy:-Math.random()*.3-.07,a:Math.random(),h:Math.random()>.7?'#4a9ebe':'#3a8c5c'})}
+  init();
+  function tick(){x.clearRect(0,0,W,H);for(var i=0;i<pts.length;i++){var p=pts[i];x.beginPath();x.arc(p.x,p.y,p.r,0,6.28);x.fillStyle=p.h;x.globalAlpha=p.a*.5;x.fill();p.x+=p.vx;p.y+=p.vy;p.a+=(Math.random()-.5)*.016;if(p.y<0){p.y=H;p.x=Math.random()*W}if(p.a<0)p.a=0;if(p.a>1)p.a=1}x.globalAlpha=1;requestAnimationFrame(tick)}
+  tick();
+})();
+
+// HERO COUNTER
+var hcv=0;
+setInterval(function(){hcv+=Math.floor(Math.random()*48000+195000);if(hcv>9999999)hcv=0;var e=document.getElementById('heroCost');if(e)e.textContent='$'+hcv.toLocaleString()},90);
+
+// SLIDER FILL HELPER
+function pct(el,v,mn,mx){el.style.setProperty('--pct',((v-mn)/(mx-mn)*100).toFixed(1)+'%')}
+
+// EXTERNALITIES
+var ps=document.getElementById('prodSlider');
+function updExt(){var v=+ps.value;pct(ps,v,0,100);document.getElementById('prodVal').textContent=v+'%';var pr=v*10,ec=Math.round(v*17.5),gp=ec-pr;document.getElementById('profit').textContent='$'+pr+'M';document.getElementById('extCost').textContent='$'+ec+'M';document.getElementById('gap').textContent='$'+gp+'M';var viz=document.getElementById('sViz');viz.innerHTML='';var dots=Math.round(v/5);for(var i=0;i<dots;i++){var d=document.createElement('div');d.className='smoke-dot';d.style.opacity=(0.3+(i/dots)*0.7).toFixed(2);viz.appendChild(d)}}
+ps.addEventListener('input',updExt);updExt();
+
+// CARBON
+var cps=document.getElementById('cpSlider');
+function updCp(){var v=+cps.value;pct(cps,v,0,200);document.getElementById('cpVal').textContent='$'+v;document.getElementById('taxEm').textContent=Math.min(90,Math.round(v*.45))+'%';document.getElementById('taxRev').textContent='$'+Math.round(v*5)+'B';document.getElementById('capEm').textContent=Math.min(95,Math.round(v*.55))+'%';document.getElementById('capPr').textContent='$'+Math.round(v*1.15)}
+cps.addEventListener('input',updCp);updCp();
+
+// COMMONS
+var pls=document.getElementById('plSlider'),fis=document.getElementById('fiSlider');
+function updCom(){var p=+pls.value,f=+fis.value;pct(pls,p,1,20);pct(fis,f,1,20);document.getElementById('playersVal').textContent=p;document.getElementById('fishVal').textContent=f;var t=p*f;document.getElementById('totHarvest').textContent=t;var r=t/100,st=document.getElementById('stockSt');if(r<.6){st.textContent='Sustainable';st.style.color='var(--acid)'}else if(r<.9){st.textContent='At Risk';st.style.color='var(--amber)'}else if(r<1.2){st.textContent='Overfished';st.style.color='var(--danger)'}else{st.textContent='Collapse!';st.style.color='var(--danger)'}var g=document.getElementById('lakeGrid');g.innerHTML='';for(var i=0;i<100;i++){var ce=document.createElement('div');var al=i<(100-Math.min(100,Math.round(r*60)));ce.className='fish-cell '+(al?'fish-alive':'fish-dead');ce.textContent=al?'\uD83D\uDC1F':'';g.appendChild(ce)}}
+pls.addEventListener('input',updCom);fis.addEventListener('input',updCom);updCom();
+
+// DISCOUNT
+var drs=document.getElementById('drSlider');
+function updDr(){var r=+drs.value/100;pct(drs,+drs.value,0,10);document.getElementById('drVal').textContent=drs.value+'%';var p50=1e12/Math.pow(1+r,25),p100=1e12/Math.pow(1+r,75);function fmt(v){return v>=1e12?'$'+(v/1e12).toFixed(1)+'T':v>=1e9?'$'+Math.round(v/1e9)+'B':'$'+Math.round(v/1e6)+'M'}document.getElementById('val50').textContent=fmt(p50);document.getElementById('val100').textContent=fmt(p100)}
+drs.addEventListener('input',updDr);updDr();
+
+// COST
+var yrs=document.getElementById('yrSlider');
+function updCost(){var yr=+yrs.value;pct(yrs,yr,2025,2100);document.getElementById('yrVal').textContent=yr;var m=(yr-2025)/75,a=Math.round(1+m*1.5),dl=Math.round(3.5+m*8),n=Math.round(12+m*20);document.getElementById('actBar').style.width=Math.min(a*2,13)+'%';document.getElementById('actBar').textContent=a+'% GDP';document.getElementById('delayBar').style.width=Math.min(dl*1.5,61)+'%';document.getElementById('delayBar').textContent=dl+'% GDP';document.getElementById('noneBar').style.width=Math.min(n,93)+'%';document.getElementById('noneBar').textContent=n+'% GDP';document.getElementById('actCost').textContent='$'+a+'T';document.getElementById('delCost').textContent='$'+dl+'T';document.getElementById('noneCost').textContent='$'+n+'T'}
+yrs.addEventListener('input',updCost);updCost();
+
+// NAV
+function toggleMenu(){var m=document.getElementById('mm'),b=document.getElementById('ham'),o=m.classList.toggle('open');b.classList.toggle('open',o);document.body.style.overflow=o?'hidden':''}
+function cm(){document.getElementById('mm').classList.remove('open');document.getElementById('ham').classList.remove('open');document.body.style.overflow=''}
+window.addEventListener('popstate',cm);
+
+// FADE IN
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.07});
+document.querySelectorAll('.fade-in').forEach(function(el){obs.observe(el)});
+
+// GAME ENGINE
+var GS={scores:{gdp:50,cr:30,wf:50,iq:30},round:1,players:1,choices:{gov:null,comp:null,cit:null},prevDel:false};
+var POL={green:{gdp:4,cr:-6,wf:5,iq:-2,l:'Green Investment'},fossil:{gdp:8,cr:10,wf:-3,iq:4,l:'Fossil Fuel Growth'},tax:{gdp:-3,cr:-8,wf:4,iq:-2,l:'Carbon Tax'},delay:{gdp:5,cr:7,wf:0,iq:2,l:'Policy Delay'}};
+var STR={output:{gdp:9,cr:8,wf:0,iq:4,l:'Maximize Output'},auto:{gdp:5,cr:4,wf:0,iq:5,l:'Automation'},gi:{gdp:4,cr:-5,wf:0,iq:-1,l:'Green Innovation'},off:{gdp:-3,cr:-2,wf:0,iq:3,l:'Shift Abroad'}};
+var BEH={consume:{gdp:6,cr:7,wf:-2,iq:0,l:'Over-Consumption'},sq:{gdp:3,cr:3,wf:0,iq:0,l:'Status Quo'},green:{gdp:-2,cr:-6,wf:6,iq:0,l:'Green Living'},protest:{gdp:-2,cr:-3,wf:3,iq:0,l:'Protest'}};
+var EVS=[{i:'\uD83C\uDF0A',n:'Flood',e:{gdp:-6,wf:-4},b:true},{i:'\uD83D\uDD25',n:'Heatwave',e:{gdp:-4,wf:-3},b:true},{i:'\uD83C\uDF3E',n:'Drought',e:{wf:-5},b:true},{i:'\uD83D\uDEE2\uFE0F',n:'Oil Price Shock',e:{gdp:-5},b:true},{i:'\uD83C\uDF31',n:'Green Tech Breakthrough',e:{gdp:7,cr:-8},b:false}];
+var RDSC=['Short-Term Comfort \u2014 growth looks easy, pollution feels harmless','Warning Signs \u2014 disasters begin, growth slows down','Final Reckoning \u2014 early choices determine your fate'];
+
+function selP(n,el){GS.players=n;document.querySelectorAll('.p-btn').forEach(function(b){b.classList.remove('active')});el.classList.add('active')}
+function startGame(){document.getElementById('setupPanel').style.display='none';document.getElementById('gameBoard').style.display='block';updLabels();updBoard({},true);updProg()}
+function updLabels(){var r=GS.players===1?{g:'&#127963; You (Gov) \u2014 Choose a Policy',c:'&#127981; You (Co.) \u2014 Choose a Strategy',ci:'&#129730; You (Citizens) \u2014 Choose a Behavior'}:GS.players===2?{g:'&#127963; P1: Gov \u2014 Policy',c:'&#127981; P2: Companies \u2014 Strategy',ci:'&#129730; P2: Citizens \u2014 Behavior'}:{g:'&#127963; P1: Gov \u2014 Policy',c:'&#127981; P2: Companies \u2014 Strategy',ci:'&#129730; P3: Citizens \u2014 Behavior'};document.getElementById('govTitle').innerHTML=r.g;document.getElementById('compTitle').innerHTML=r.c;document.getElementById('citTitle').innerHTML=r.ci}
+function selC(ph,key,el){el.closest('.game-phase').querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('selected')});el.classList.add('selected');GS.choices[ph]=key;document.getElementById({gov:'govBtn',comp:'compBtn',cit:'citBtn'}[ph]).disabled=false}
+function confPhase(ph){document.getElementById({gov:'phGov',comp:'phComp',cit:'phCit'}[ph]).classList.remove('active');if(ph==='gov')document.getElementById('phComp').classList.add('active');else if(ph==='comp')document.getElementById('phCit').classList.add('active');else resolveRound()}
+function resolveRound(){document.getElementById('phCit').classList.remove('active');var d={gdp:0,cr:0,wf:0,iq:0};var po=POL[GS.choices.gov],st=STR[GS.choices.comp],be=BEH[GS.choices.cit];[po,st,be].forEach(function(c){for(var k in d)d[k]+=(c[k]||0)});addLog('Gov: <span class="lh">'+po.l+'</span> | Co: <span class="lh">'+st.l+'</span> | Cit: <span class="lh">'+be.l+'</span>','');if(GS.choices.gov==='delay'&&GS.prevDel){d.cr+=4;addLog('\u26A0 Repeat delay! <span class="lh">Climate+4 penalty</span>','bad')}GS.prevDel=GS.choices.gov==='delay';if(GS.scores.cr>=50){var pn=Math.round(d.gdp*.25);d.gdp-=pn;addLog('\uD83C\uDF21 High risk: <span class="lh">GDP reduced '+pn+'</span>','bad')}for(var k in d)GS.scores[k]=Math.max(0,Math.min(100,GS.scores[k]+d[k]));updBoard(d);var ev;if(GS.scores.cr>=70){var bd=EVS.filter(function(e){return e.b});ev=bd[Math.floor(Math.random()*bd.length)];addLog('\uD83D\uDEA8 Clim Risk\u226570: <span class="lh">Disaster locked in!</span>','bad')}else ev=EVS[Math.floor(Math.random()*EVS.length)];var ef=ev.e;for(var k in ef)GS.scores[k]=Math.max(0,Math.min(100,GS.scores[k]+ef[k]));addLog(ev.i+' <span class="lh">'+ev.n+'</span> \u2192 '+Object.entries(ef).map(function(x){return x[0].toUpperCase()+' '+(x[1]>0?'+':'')+x[1]}).join(', '),ev.b?'bad':'good');updBoard({});document.getElementById('phEv').classList.add('active');document.getElementById('evDisplay').innerHTML='<div class="ev-icon">'+ev.i+'</div><div class="ev-name">'+ev.n+'</div><div class="ev-sub">'+(ev.b?'A climate disaster strikes your nation.':'A positive breakthrough changes the picture.')+'</div><div class="cb-fx">'+Object.entries(ef).map(function(x){return'<span class="fx '+(x[1]<0?'fx-n':'fx-p')+'">'+x[0].toUpperCase()+' '+(x[1]>0?'+':'')+x[1]+'</span>'}).join('')+'</div>'}
+function nextRound(){document.getElementById('phEv').classList.remove('active');if(GS.round===3){showResult();return}GS.round++;GS.choices={gov:null,comp:null,cit:null};document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('selected')});['govBtn','compBtn','citBtn'].forEach(function(id){document.getElementById(id).disabled=true});document.getElementById('rndBadge').textContent='Round '+GS.round+' / 3';document.getElementById('rndDesc').textContent=RDSC[GS.round-1];updProg();addLog('\u2501\u2501 <span class="lh">Round '+GS.round+' \u2014 Year '+((GS.round-1)*10+1)+' to '+(GS.round*10)+'</span> \u2501\u2501','');document.getElementById('phGov').classList.add('active')}
+function showResult(){var s=GS.scores,el=document.getElementById('finalRes');var ic,ti,de,co;if(s.cr>=80){ic='\uD83D\uDC80';ti='Collapse';de='Climate Risk exceeded 80. Catastrophe devastated your economy. Infrastructure failed, food systems collapsed.';co='var(--danger)'}else if(s.gdp>=70&&s.wf<50){ic='\u26A0\uFE0F';ti='Unbalanced Growth';de='Economy grew but people were left behind. High GDP masked deep inequality and poor welfare.';co='var(--amber)'}else if(s.cr<=45&&s.gdp<55){ic='\u26A0\uFE0F';ti='Green but Poor';de='You protected the climate but failed to grow the economy. Sustainable development requires balancing both.';co='var(--amber)'}else if(s.gdp>=70&&s.cr<=45&&s.wf>=65&&s.iq<=45){ic='\u2705';ti='Sustainable Development';de='Exceptional! You achieved strong growth while protecting the climate, ensuring welfare, and reducing inequality.';co='var(--acid)'}else{ic='\uD83D\uDCCA';ti='Mixed Results';de='GDP: '+s.gdp+' | Climate: '+s.cr+' | Welfare: '+s.wf+' | Inequality: '+s.iq+'. Your choices moved the needle but all four scores need balance.';co='var(--glacier)'}el.style.setProperty('--rc',co);el.classList.add('show');document.getElementById('fIcon').textContent=ic;document.getElementById('fTitle').textContent=ti;document.getElementById('fTitle').style.color=co;document.getElementById('fDesc').textContent=de;document.getElementById('fMsg').textContent='\u201CYour economic choices created your future. Climate damage was not separate \u2014 it decided your economy.\u201D \u2014 An Inconvenient Truth'}
+function resetGame(){GS.scores={gdp:50,cr:30,wf:50,iq:30};GS.round=1;GS.choices={gov:null,comp:null,cit:null};GS.prevDel=false;document.getElementById('finalRes').classList.remove('show');document.getElementById('gameBoard').style.display='none';document.getElementById('setupPanel').style.display='block';document.getElementById('gameLog').innerHTML='<div class="log-entry">&#9658; Simulation started. <span class="lh">Year 1 of 30.</span> Make your first decisions.</div>';document.querySelectorAll('.p-btn').forEach(function(b){b.classList.remove('active')});document.querySelector('.p-btn').classList.add('active');document.querySelectorAll('.game-phase').forEach(function(p){p.classList.remove('active')});document.getElementById('rndBadge').textContent='Round 1 / 3';document.getElementById('rndDesc').textContent=RDSC[0];updBoard({},true);updProg();document.getElementById('phGov').classList.add('active')}
+function updBoard(d,init){var mp={gdp:'GDP',cr:'CR',wf:'WF',iq:'IQ'};for(var k in mp){var lb=mp[k];document.getElementById('s'+lb).textContent=GS.scores[k];document.getElementById('b'+lb).style.width=GS.scores[k]+'%';if(!init&&d[k]!==undefined&&d[k]!==0){(function(l,v){var e=document.getElementById('d'+l);e.textContent=(v>0?'+':'')+v;e.style.color=v>0?'var(--acid)':'var(--danger)';setTimeout(function(){e.textContent=''},2000)})(lb,d[k])}}}
+function updProg(){for(var i=1;i<=3;i++){var e=document.getElementById('p'+i);e.className='prog-step'+(i<GS.round?' done':i===GS.round?' current':'')}}
+function addLog(msg,type){var log=document.getElementById('gameLog');var div=document.createElement('div');div.className='log-entry'+(type?' '+type:'');div.innerHTML='&#9658; '+msg;log.appendChild(div);log.scrollTop=log.scrollHeight}
+</script>
+</body>
+</html>
